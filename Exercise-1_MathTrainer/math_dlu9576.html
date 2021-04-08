@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Simple Math Test - dlu9576</title>
+    </head>
+    <body>
+        <span id='previous_results'></span>
+        <span id="calculation_example" style="margin-right: 10px;"></span><input type="number" id="user_result" placeholder="Enter solution here.."></input>
+    </body>
+    <script>
+        /* ##### Logic ##### */
+
+        function generateCalcExample() {
+            console.log('Generating new calc example..');
+            document.getElementById('calculation_example').textContent = getRandomInt(100) + ' ' + getOperatorRandomly() + ' ' + getRandomInt(100);
+        }
+
+        function checkUserResult(calculation, userResult) {
+            console.log('Checking user calculated result..');
+            return eval(calculation) == userResult;
+        }
+
+        function getOperatorRandomly() {
+            const operators = ['+', '-', '*', '/'];
+            return operators[Math.floor(Math.random() * operators.length)];
+        }
+
+        function getRandomInt(max) {
+            return Math.floor(Math.random() * Math.floor(max));
+        }
+
+        /* ##### Listeners ##### */
+        const previousResults = document.getElementById('previous_results');
+        const calcExample = document.getElementById('calculation_example');
+        const userResult = document.getElementById('user_result');
+
+        window.addEventListener('load', (event) => {
+            console.log('Generating initial calculation example..');
+            generateCalcExample();
+        });
+
+        userResult.addEventListener('keyup', (event) => {
+            if (event.key !== "Enter") {
+                return;
+            }
+
+            // Create calc history
+            let historyResult = document.createElement('p');
+            historyResult.innerText = calcExample.innerText + ' = ' + eval(calcExample.innerText);
+            historyResult.style.color = checkUserResult(calcExample.innerText, userResult.value) ? 'green' : 'red';
+            historyResult.style.fontWeight = 'bold';
+            previousResults.appendChild(historyResult);
+
+            // Generate new calc example
+            userResult.value = '';
+            generateCalcExample();
+        });
+    </script>
+</html>
