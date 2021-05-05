@@ -30,9 +30,21 @@ const MenuItem = styled.li`
 export const NavBar = (props: NavBarProps): JSX.Element => {
     return (
         <NavBarHeader>
-            <MenuItem><Link style={{textDecoration: 'none', color: 'white'}} to="/numbers">Numbers</Link></MenuItem>
-            <MenuItem><Link style={{textDecoration: 'none', color: 'white'}} to="/date">Date</Link></MenuItem>
-            <MenuItem><Link style={{textDecoration: 'none', color: 'white'}} to="/texts">Texts</Link></MenuItem>
+            <MenuItem>
+                <Link style={{textDecoration: 'none', color: 'white'}} to={{ pathname: '/numbers', search: `?lang=${props.currentLanguage}` }}>
+                    Numbers
+                </Link>
+            </MenuItem>
+            <MenuItem>
+                <Link style={{textDecoration: 'none', color: 'white'}} to={{ pathname: '/date', search: `?lang=${props.currentLanguage}` }}>
+                    Date
+                </Link>
+            </MenuItem>
+            <MenuItem>
+                <Link style={{textDecoration: 'none', color: 'white'}} to={{ pathname: '/texts', search: `?lang=${props.currentLanguage}` }}>
+                    Texts
+                </Link>
+            </MenuItem>
             <MenuItem>
                 <select defaultValue={props.currentLanguage} onChange={(e) => props.setLanguage(e.target.value)}>
                     <option value="de">de</option>
