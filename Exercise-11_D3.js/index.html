@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        <meta charset='UTF-8'>
+        <title>D3.js - dlu9576</title>
+
+        <!-- JS -->
+        <script src='https://d3js.org/d3.v4.js'></script>
+    </head>
+    <body>
+        <script>
+            const margin = { top: 10, right: 30, bottom: 100, left: 60 },
+                width = 1000 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+            // Line diagram - Active Covid-19 cases in Austria
+            // Code inspired by https://www.d3-graph-gallery.com/graph/line_basic.html
+            d3.json('https://api.covid19api.com/total/country/austria', (json) => {
+                const data = json.map((value) => {
+                    return {
+                        date: new Date(value.Date),
+                        cases: value.Active,
+                    };
+                });
+
+                // Actual graph
+                const svg = d3
+                    .select('body')
+                    .append('svg')
+                    .attr('width', width + margin.left + margin.right)
+                    .attr('height', height + margin.top + margin.bottom)
+                    .append('g')
+                    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+                // X axis
+                const xScale = d3
+                    .scaleTime()
+                    .domain(d3.extent(data, (dataSet) => dataSet.date))
+                    .range([0, width]);
+                svg.append('g')
+                    .attr('transform', 'translate(0,' + height + ')')
+                    .call(d3.axisBottom(xScale));
+
+                // Y axis
+                const yScale = d3
+                    .scaleLinear()
+                    .domain([0, d3.max(data, (dataSet) => dataSet.cases)])
+                    .range([height, 0]);
+                svg.append('g').call(d3.axisLeft(yScale));
+
+                // Draw line
+                svg.append('path')
+                    .datum(data)
+                    .attr('fill', 'none')
+                    .attr('stroke', 'steelblue')
+                    .attr('stroke-width', 1.5)
+                    .attr(
+                        'd',
+                        d3
+                            .line()
+                            .x((dataSet) => xScale(dataSet.date))
+                            .y((dataSet) => yScale(dataSet.cases))
+                    );
+            });
+
+            // Bar graph - Active Covid-19 cases in the top 15 countries
+            // Code inspired by https://www.d3-graph-gallery.com/graph/barplot_animation_start.html
+            d3.json('https://api.covid19api.com/summary', (json) => {
+                const data = json.Countries.map((value) => {
+                    return {
+                        country: value.Country,
+                        cases: value.TotalConfirmed - (value.TotalRecovered + value.TotalDeaths),
+                    };
+                })
+                    .sort((a, b) => b.cases - a.cases)
+                    .slice(0, 15);
+
+                // Actual graph
+                const svg = d3
+                    .select('body')
+                    .append('svg')
+                    .attr('width', width + margin.left + margin.right)
+                    .attr('height', height + margin.top + margin.bottom)
+                    .append('g')
+                    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+                // X axis
+                const xScale = d3
+                    .scaleBand()
+                    .domain(data.map((dataSet) => dataSet.country))
+                    .range([0, width])
+                    .padding(0.2);
+                svg.append('g')
+                    .attr('transform', 'translate(0,' + height + ')')
+                    .call(d3.axisBottom(xScale))
+                    .selectAll('text')
+                    .attr('transform', 'translate(-10,0)rotate(-45)')
+                    .style('text-anchor', 'end');
+
+                // Y axis
+                const yScale = d3
+                    .scaleLinear()
+                    .domain([0, d3.max(data, (dataSet) => dataSet.cases)])
+                    .range([height, 0]);
+                svg.append('g').call(d3.axisLeft(yScale));
+
+                // Bars
+                svg.selectAll('.bar')
+                    .data(data)
+                    .enter()
+                    .append('rect')
+                    .attr('fill', 'steelblue')
+                    .attr('x', (dataSet) => xScale(dataSet.country))
+                    .attr('width', xScale.bandwidth())
+                    .attr('y', () => yScale(0))
+                    .attr('height', 0);
+
+                // Animation
+                svg.selectAll('rect')
+                    .transition()
+                    .duration(3000)
+                    .attr('y', (dataSet) => yScale(dataSet.cases))
+                    .attr('height', (dataSet) => height - yScale(dataSet.cases));
+            });
+        </script>
+    </body>
+</html>
